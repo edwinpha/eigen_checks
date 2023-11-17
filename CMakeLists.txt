@@ -25,14 +25,25 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(eigen_checks)
 
-find_package(catkin_simple REQUIRED)
-catkin_simple()
+find_package(catkin REQUIRED)
+find_package(gflags REQUIRED)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(glog REQUIRED libglog)
+pkg_check_modules(Eigen3 REQUIRED eigen3)
 
 add_definitions(--std=c++0x -Wall -Wextra -pedantic)
 
-cs_add_library(${PROJECT_NAME} src/eigen-checks.cc)
+add_library(${PROJECT_NAME} src/eigen-checks.cc)
 
 find_package (Threads)
+
+catkin_package()
+
+add_library(eigen_checks_node
+    src/eigen-checks.cc
+)
+
 catkin_add_gtest(test_gtest_near
 	test/test_gtest-near.cc)
 target_link_libraries(test_gtest_near ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
@@ -73,7 +84,9 @@ catkin_add_gtest(test_gtest-zero-sized-types
   test/test_gtest-zero-sized-types.cc)
 target_link_libraries(test_gtest-zero-sized-types ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
-cs_install()
+install(DIRECTORY include/${PROJECT_NAME}/
+CFG_EXTRAS eigen_checks-extras.cmake
+DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-cs_export(INCLUDE_DIRS include
-          CFG_EXTRAS eigen_checks-extras.cmake)
+# export(INCLUDE_DIRS include
+#           CFG_EXTRAS eigen_checks-extras.cmake)
